@@ -3,7 +3,7 @@ import heapq
 import math
 import sys
 
-STUDENT_ID = "a853245"  # your student ID
+STUDENT_ID = "a1853245"  # your student ID
 DEGREE = "UG"  # or PG if you are in the postgraduate course
 
 
@@ -123,19 +123,20 @@ def main():
     map_file = sys.argv[2]
     algorithm = sys.argv[3]
 
-    heuristic = None
-    if len(sys.argv) == 5:
-        heuristic_type = sys.argv[4]
-        if algorithm == "astar":
-            if heuristic_type == "euclidean":
-                heuristic = euclidian_distance
-            elif heuristic_type == "manhattan":
-                heuristic = manhattan_distance
-            else:
-                print("Unknown heuristic!")
-                return
+    # heuristic = None
+    # if len(sys.argv) == 5:
+    #     heuristic_type = sys.argv[4]
+    # if algorithm == "astar":
+    #     if heuristic_type == "euclidean":
+    #         heuristic = euclidian_distance
+    #     elif heuristic_type == "manhattan":
+    #         heuristic = manhattan_distance
+    #     else:
+    #         print("Unknown heuristic!")
+    #         return
 
     with open(map_file, "r") as f:
+        rows, cols = map(int, f.readline().split())
         start = tuple(map(lambda x: int(x) - 1, f.readline().split()))
         end = tuple(map(lambda x: int(x) - 1, f.readline().split()))
         grid = []
@@ -144,10 +145,10 @@ def main():
 
     if algorithm == "bfs":
         path, visit_count, first_visit, last_visit = BFS(grid, start, end)
-    elif algorithm == "ucs":
-        path, visit_count, first_visit, last_visit = UCS(grid, start, end)
-    elif algorithm == "astar" and heuristic is not None:
-        path, visit_count, first_visit, last_visit = ASTAR(grid, start, end, heuristic)
+    # elif algorithm == "ucs":
+    #     path, visit_count, first_visit, last_visit = UCS(grid, start, end)
+    # elif algorithm == "astar" and heuristic is not None:
+    #     path, visit_count, first_visit, last_visit = ASTAR(grid, start, end, heuristic)
     else:
         print("Unknown algorithm or missing heuristic!")
         return
