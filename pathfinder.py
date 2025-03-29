@@ -93,7 +93,8 @@ def print_debug(map, path, visit_count, first_visit, last_visit):
 
     print("\nfirst visit:")
     max_widths = [
-        max(len(str(row[i])) for row in first_visit) for i in range(len(first_visit[0]))
+        max(len(str(row[i])) for row in first_visit if row[i] is not None)
+        for i in range(len(first_visit[0]))
     ]
     for row in first_visit:
         print(
@@ -109,7 +110,8 @@ def print_debug(map, path, visit_count, first_visit, last_visit):
 
     print("\nlast visit:")
     max_widths = [
-        max(len(str(row[i])) for row in last_visit) for i in range(len(first_visit[0]))
+        max(len(str(row[i])) for row in first_visit if row[i] is not None)
+        for i in range(len(first_visit[0]))
     ]
     for row in last_visit:
         print(
