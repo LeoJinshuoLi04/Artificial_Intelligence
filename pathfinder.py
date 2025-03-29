@@ -287,12 +287,12 @@ def main():
     if mode == "debug" and path:
         print_debug(grid, path, visit_count, first_visit, last_visit)
     elif not path:
-        print("path:\nnull")
+        print("null")
 
     if mode == "release" and path:
         print_release(grid, path)
     elif not path:
-        print("path:\nnull")
+        print("null")
 
 
 if __name__ == "__main__":
