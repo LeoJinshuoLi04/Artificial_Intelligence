@@ -97,7 +97,7 @@ def print_debug(map, path, visit_count, first_visit, last_visit):
     ]
     for row in first_visit:
         print(
-            "  ".join(
+            " ".join(
                 (
                     f"{str(item):>{max_widths[i]}}"
                     if item != None
@@ -113,7 +113,7 @@ def print_debug(map, path, visit_count, first_visit, last_visit):
     ]
     for row in last_visit:
         print(
-            "  ".join(
+            " ".join(
                 (
                     f"{str(item):>{max_widths[i]}}"
                     if item != None
