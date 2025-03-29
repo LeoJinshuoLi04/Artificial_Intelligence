@@ -92,24 +92,36 @@ def print_debug(map, path, visit_count, first_visit, last_visit):
         print(line.strip())
 
     print("\nfirst visit:")
-    for r in range(rows):
-        line = ""
-        for c in range(cols):
-            if first_visit[r][c] is not None:
-                line += f"{first_visit[r][c]:3} "
-            else:
-                line += "  " + str(map[r][c]) + " "
-        print(line.strip())
+    max_widths = [
+        max(len(str(row[i])) for row in first_visit) for i in range(len(first_visit[0]))
+    ]
+    for row in first_visit:
+        print(
+            "  ".join(
+                (
+                    f"{str(item):>{max_widths[i]}}"
+                    if item != None
+                    else f"{'X':>{max_widths[i]}}"
+                )
+                for i, item in enumerate(row)
+            )
+        )
 
     print("\nlast visit:")
-    for r in range(rows):
-        line = ""
-        for c in range(cols):
-            if last_visit[r][c] is not None:
-                line += f"{last_visit[r][c]:3} "
-            else:
-                line += "  " + str(map[r][c]) + " "
-        print(line.strip())
+    max_widths = [
+        max(len(str(row[i])) for row in last_visit) for i in range(len(first_visit[0]))
+    ]
+    for row in last_visit:
+        print(
+            "  ".join(
+                (
+                    f"{str(item):>{max_widths[i]}}"
+                    if item != None
+                    else f"{'X':>{max_widths[i]}}"
+                )
+                for i, item in enumerate(row)
+            )
+        )
 
 
 def main():
