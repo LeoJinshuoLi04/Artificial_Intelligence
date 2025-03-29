@@ -7,7 +7,7 @@ STUDENT_ID = "a1853245"  # your student ID
 DEGREE = "UG"  # or PG if you are in the postgraduate course
 
 
-def BFS(map, start, goal):
+def BFS(rows, cols, map, start, goal):
     fringe = deque()
     fringe.append(start)
     rows = len(map)
@@ -49,10 +49,139 @@ def BFS(map, start, goal):
     return None, visit_count, first_visit, last_visit
 
 
+def UCS(rows, cols, map, start, goal):
+    dist = [[float("inf")] * cols for _ in range(rows)]
+    visit_count = [[0] * cols for _ in range(rows)]
+    first_visit = [[None] * cols for _ in range(rows)]
+    last_visit = [[None] * cols for _ in range(rows)]
+    prev = [[None] * cols for _ in range(rows)]
+
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    start_x, start_y = start
+    dist[start_x][start_y] = 0
+    prev[start_x][start_y] = (start_x, start_y)
+
+    fringe = []
+    heapq.heappush(fringe, (0, 0, start_x, start_y))
+
+    step = 1
+    counter = 1
+
+    while fringe:
+        current_dist, _, x, y = heapq.heappop(fringe)
+
+        if current_dist > dist[x][y]:
+            continue
+
+        if first_visit[x][y] is None:
+            first_visit[x][y] = step
+
+            if (x, y) == goal:
+                path = []
+                curr = (x, y)
+                while curr != start:
+                    path.append(curr)
+                    curr = prev[curr[0]][curr[1]]
+                path.append(start)
+                return path[::-1], visit_count, first_visit, last_visit
+
+        for dx, dy in directions:
+            new_x, new_y = x + dx, y + dy
+
+            if 0 <= new_x < rows and 0 <= new_y < cols and map[new_x][new_y] != "X":
+                elevation_diff = map[new_x][new_y] - map[x][y]
+                cost = 1 + max(0, elevation_diff)
+                new_dist = current_dist + cost
+
+                if new_dist < dist[new_x][new_y]:
+                    dist[new_x][new_y] = new_dist
+                    prev[new_x][new_y] = (x, y)
+                    heapq.heappush(fringe, (new_dist, counter, new_x, new_y))
+                    counter += 1
+
+                visit_count[new_x][new_y] += 1
+                last_visit[new_x][new_y] = step
+                step += 1
+
+    return None, visit_count, first_visit, last_visit
+
+
+def euclidian(node, goal):
+    x1, y1 = node
+    x2, y2 = goal
+    return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+
+def manhattan(node, goal):
+    x1, y1 = node
+    x2, y2 = goal
+    return abs(x2 - x1) + abs(y2 - y1)
+
+
+def ASTAR(rows, cols, map, start, goal, heuristic):
+    g_score = [[float("inf")] * cols for _ in range(rows)]
+    f_score = [[float("inf")] * cols for _ in range(rows)]
+    visit_count = [[0] * cols for _ in range(rows)]
+    first_visit = [[None] * cols for _ in range(rows)]
+    last_visit = [[None] * cols for _ in range(rows)]
+    prev = [[None] * cols for _ in range(rows)]
+
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    start_x, start_y = start
+    g_score[start_x][start_y] = 0
+    f_score[start_x][start_y] = heuristic(start, goal)
+    prev[start_x][start_y] = (start_x, start_y)
+
+    fringe = []
+    heapq.heappush(fringe, (f_score[start_x][start_y], 0, start_x, start_y))
+
+    step = 1
+    counter = 1
+
+    while fringe:
+        current_f, _, x, y = heapq.heappop(fringe)
+
+        if current_f > f_score[x][y]:
+            continue
+
+        visit_count[x][y] += 1
+        if first_visit[x][y] is None:
+            first_visit[x][y] = step
+        last_visit[x][y] = step
+        step += 1
+
+        if (x, y) == goal:
+            path = []
+            curr = (x, y)
+            while curr != start:
+                path.append(curr)
+                curr = prev[curr[0]][curr[1]]
+            path.append(start)
+            return path[::-1], visit_count, first_visit, last_visit
+
+        for dx, dy in directions:
+            new_x, new_y = x + dx, y + dy
+
+            if 0 <= new_x < rows and 0 <= new_y < cols and map[new_x][new_y] != "X":
+                elevation_diff = map[new_x][new_y] - map[x][y]
+                cost = 1 + max(0, elevation_diff)
+                tentative_g = g_score[x][y] + cost
+
+                if tentative_g < g_score[new_x][new_y]:
+                    prev[new_x][new_y] = (x, y)
+                    g_score[new_x][new_y] = tentative_g
+                    f_score[new_x][new_y] = tentative_g + heuristic((new_x, new_y), goal)
+                    heapq.heappush(fringe, (f_score[new_x][new_y], counter, new_x, new_y))
+                    counter += 1
+
+    return None, visit_count, first_visit, last_visit
+
+
 def print_release(map, path):
     rows = len(map)
     cols = len(map[0])
-    print("path:")
     for r in range(rows):
         line = ""
         for c in range(cols):
@@ -81,7 +210,7 @@ def print_debug(map, path, visit_count, first_visit, last_visit):
                 line += str(map[r][c]) + " "
         print(line.strip())
 
-    print("\n#visits:")
+    print("#visits:")
     for r in range(rows):
         line = ""
         for c in range(cols):
@@ -91,36 +220,26 @@ def print_debug(map, path, visit_count, first_visit, last_visit):
                 line += str(map[r][c]) + " "
         print(line.strip())
 
-    print("\nfirst visit:")
+    print("first visit:")
     max_widths = [
-        max(len(str(row[i])) for row in first_visit if row[i] is not None)
-        for i in range(len(first_visit[0]))
+        max(len(str(row[i])) for row in first_visit if row[i] is not None) for i in range(len(first_visit[0]))
     ]
     for row in first_visit:
         print(
             " ".join(
-                (
-                    f"{str(item):>{max_widths[i]}}"
-                    if item != None
-                    else f"{'X':>{max_widths[i]}}"
-                )
+                (f"{str(item):>{max_widths[i]}}" if item != None else f"{'X':>{max_widths[i]}}")
                 for i, item in enumerate(row)
             )
         )
 
-    print("\nlast visit:")
+    print("last visit:")
     max_widths = [
-        max(len(str(row[i])) for row in first_visit if row[i] is not None)
-        for i in range(len(first_visit[0]))
+        max(len(str(row[i])) for row in first_visit if row[i] is not None) for i in range(len(first_visit[0]))
     ]
     for row in last_visit:
         print(
             " ".join(
-                (
-                    f"{str(item):>{max_widths[i]}}"
-                    if item != None
-                    else f"{'X':>{max_widths[i]}}"
-                )
+                (f"{str(item):>{max_widths[i]}}" if item != None else f"{'X':>{max_widths[i]}}")
                 for i, item in enumerate(row)
             )
         )
@@ -128,26 +247,24 @@ def print_debug(map, path, visit_count, first_visit, last_visit):
 
 def main():
     if len(sys.argv) < 4:
-        print(
-            "Usage: python pathfinder.py [mode] [map] [algorithm] [heuristic (optional)]"
-        )
+        print("Usage: python pathfinder.py [mode] [map] [algorithm] [heuristic (optional)]")
         return
 
     mode = sys.argv[1]
     map_file = sys.argv[2]
     algorithm = sys.argv[3]
 
-    # heuristic = None
-    # if len(sys.argv) == 5:
-    #     heuristic_type = sys.argv[4]
-    # if algorithm == "astar":
-    #     if heuristic_type == "euclidean":
-    #         heuristic = euclidian_distance
-    #     elif heuristic_type == "manhattan":
-    #         heuristic = manhattan_distance
-    #     else:
-    #         print("Unknown heuristic!")
-    #         return
+    heuristic = None
+    if len(sys.argv) == 5:
+        heuristic_type = sys.argv[4]
+    if algorithm == "astar":
+        if heuristic_type == "euclidean":
+            heuristic = euclidian
+        elif heuristic_type == "manhattan":
+            heuristic = manhattan
+        else:
+            print("Unknown heuristic!")
+            return
 
     with open(map_file, "r") as f:
         rows, cols = map(int, f.readline().split())
@@ -158,11 +275,11 @@ def main():
             grid.append([int(x) if x != "X" else "X" for x in line.split()])
 
     if algorithm == "bfs":
-        path, visit_count, first_visit, last_visit = BFS(grid, start, end)
-    # elif algorithm == "ucs":
-    #     path, visit_count, first_visit, last_visit = UCS(grid, start, end)
-    # elif algorithm == "astar" and heuristic is not None:
-    #     path, visit_count, first_visit, last_visit = ASTAR(grid, start, end, heuristic)
+        path, visit_count, first_visit, last_visit = BFS(rows, cols, grid, start, end)
+    elif algorithm == "ucs":
+        path, visit_count, first_visit, last_visit = UCS(rows, cols, grid, start, end)
+    elif algorithm == "astar" and heuristic is not None:
+        path, visit_count, first_visit, last_visit = ASTAR(rows, cols, grid, start, end, heuristic)
     else:
         print("Unknown algorithm or missing heuristic!")
         return
